@@ -53,13 +53,20 @@ function rollSlider() {
 }
 
 let x1 = null;
-let y1 = null;
 let x2 = null;
-let y2 = null;
-sliderLine.addEventListener("touchstart", handleTouchStart, false);
+let isSwipeMouse=false
+sliderLine.addEventListener("touchstart", handleTouchStart);
 sliderLine.addEventListener("touchmove", handleTouchMove);
-sliderLine.addEventListener("touchend", handleTouchEnd, false);
-function handleTouchEnd(e) {
+sliderLine.addEventListener("touchend", handleTouchEnd);
+sliderLine.addEventListener("mousedown", handleMouseStart);
+sliderLine.addEventListener("mousemove", handleMouseMove);
+sliderLine.addEventListener("mouseout", handleMouseEnd);
+sliderLine.addEventListener("mouseup", handleMouseEnd);
+
+
+
+function handleMouseEnd(e) {
+    isSwipeMouse=false
     sliderLine.style.transition = 'all ease 0.5s'
   let xDiff = x2 - x1;
 
@@ -80,16 +87,72 @@ function handleTouchEnd(e) {
   x1 = null;
   x2 = null;
 }
+function handleTouchEnd(e) {
+    
+    sliderLine.style.transition = 'all ease 0.5s'
+  let xDiff = x2 - x1;
+
+  if (xDiff > 0 && Math.abs(xDiff) > width*0.15  && count > 0 && x2) {
+    count--;
+    rollSlider();
+    toggleActiveDot(count);
+  }
+  if (xDiff < 0 && Math.abs(xDiff) > width*0.15 && count != images.length - 1 && x2) {
+    count++;
+    rollSlider();
+    toggleActiveDot(count);
+  } else {
+    rollSlider();
+    toggleActiveDot(count);
+  }
+
+  x1 = null;
+  x2 = null;
+}
+function handleMouseStart(e) {
+    console.log('start',e)
+  x1 = e.screenX;
+  isSwipeMouse=true
+}
 function handleTouchStart(e) {
+  
   const firstTouch = e.touches[0];
+  
   x1 = firstTouch.screenX;
 }
 
+function handleMouseMove(e) {
+  if (!x1) {
+    return false;
+  }
+if(isSwipeMouse){
+    sliderLine.style.transition = 'none'
+  x2 = e.screenX;
+
+  let xDiff = x2 - x1;
+
+  if (xDiff > 0 && count <= images.length) {
+    sliderLine.style.transform = `translateX(-${
+      width * count - Math.abs(xDiff)
+    }px`;
+  }
+  if (xDiff < 0 && count != images.length - 1) {
+    sliderLine.style.transform = `translateX(-${
+      width * count + Math.abs(xDiff)
+    }px)`;
+  }
+}
+
+}
 function handleTouchMove(e) {
+    console.log('move',e)
   if (!x1) {
     return false;
   }
   const firstTouch = e.touches[0];
+  
+
+  
 sliderLine.style.transition = 'none'
   x2 = firstTouch.screenX;
 
