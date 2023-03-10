@@ -21,7 +21,7 @@ let width;
 
 function init() {
   width = document.querySelector(".slider-country").offsetWidth;
-  sliderLine.style.width = width * images.length + "px";
+ 
   images.forEach((item) => {
     item.style.width = width + "px";
     item.style.height = "auto";
@@ -62,13 +62,17 @@ sliderLine.addEventListener("touchend", handleTouchEnd, false);
 function handleTouchEnd(e) {
     sliderLine.style.transition = 'all ease 0.5s'
   let xDiff = x2 - x1;
-  if (xDiff > 0 && count > 0 && x2) {
+
+  if (xDiff > 0 && Math.abs(xDiff) > width*0.15  && count > 0 && x2) {
     count--;
     rollSlider();
     toggleActiveDot(count);
   }
-  if (xDiff < 0 && count != images.length - 1 && x2) {
+  if (xDiff < 0 && Math.abs(xDiff) > width*0.15 && count != images.length - 1 && x2) {
     count++;
+    rollSlider();
+    toggleActiveDot(count);
+  } else {
     rollSlider();
     toggleActiveDot(count);
   }
