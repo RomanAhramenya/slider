@@ -11,30 +11,29 @@ fullInformation.addEventListener("click", () => {
   });
 });
 
-// мое
+// my code
+
 const images = document.querySelectorAll(".slider-line .slider-items img");
+const sliderWrapper = document.querySelector(".slider-country");
 const sliderLine = document.querySelector(".slider-line");
 const dotsSlider = document.querySelectorAll(".dot-slider");
-
 let count = 0;
 let width;
 
-function init() {
-  width = document.querySelector(".slider-country").offsetWidth;
- 
+function adaptImage() {
+  width = sliderWrapper.offsetWidth;
   images.forEach((item) => {
     item.style.width = width + "px";
     item.style.height = "auto";
   });
-  rollSlider();
 }
-window.addEventListener("resize", init);
-init();
+window.addEventListener("resize", adaptImage);
+adaptImage();
 
 dotsSlider.forEach((item, index) => {
   item.addEventListener("click", () => {
     count = index;
-    rollSlider();
+    sliderScroll();
     toggleActiveDot(count);
   });
 });
@@ -47,114 +46,70 @@ function toggleActiveDot(element) {
     }
   });
 }
-function rollSlider() {
-    sliderLine.style.transition = 'all ease 0.5s'
+function sliderScroll() {
+  sliderLine.style.transition = "all ease 0.5s";
   sliderLine.style.transform = "translateX(-" + count * width + "px)";
 }
 
+sliderLine.addEventListener("touchstart", handleStart);
+sliderLine.addEventListener("touchmove", handleMove);
+sliderLine.addEventListener("touchend", handleEnd);
+sliderLine.addEventListener("mousedown", handleStart);
+sliderLine.addEventListener("mousemove", handleMouseMove);
+sliderLine.addEventListener("mouseout", handleEnd);
+sliderLine.addEventListener("mouseup", handleEnd);
+
 let x1 = null;
 let x2 = null;
-let isSwipeMouse=false
-sliderLine.addEventListener("touchstart", handleTouchStart);
-sliderLine.addEventListener("touchmove", handleTouchMove);
-sliderLine.addEventListener("touchend", handleTouchEnd);
-sliderLine.addEventListener("mousedown", handleMouseStart);
-sliderLine.addEventListener("mousemove", handleMouseMove);
-sliderLine.addEventListener("mouseout", handleMouseEnd);
-sliderLine.addEventListener("mouseup", handleMouseEnd);
+let isSwipeMouse = false;
+const offsetPercentScroll = 0.15;
+const mousedown = 'mousedown';
+const mousemove = 'mousemove';
 
-
-
-function handleMouseEnd(e) {
-    isSwipeMouse=false
-    sliderLine.style.transition = 'all ease 0.5s'
+function handleEnd(e) {
+  isSwipeMouse = false;
+  sliderLine.style.transition = "all ease 0.5s";
   let xDiff = x2 - x1;
 
-  if (xDiff > 0 && Math.abs(xDiff) > width*0.15  && count > 0 && x2) {
+  if (xDiff > 0 && Math.abs(xDiff) > width * offsetPercentScroll && count > 0 && x2) {
     count--;
-    rollSlider();
+    sliderScroll();
     toggleActiveDot(count);
   }
-  if (xDiff < 0 && Math.abs(xDiff) > width*0.15 && count != images.length - 1 && x2) {
+  if (
+    xDiff < 0 &&
+    Math.abs(xDiff) > width * offsetPercentScroll &&
+    count != images.length - 1 &&
+    x2
+  ) {
     count++;
-    rollSlider();
+    sliderScroll();
     toggleActiveDot(count);
   } else {
-    rollSlider();
+    sliderScroll();
     toggleActiveDot(count);
   }
 
   x1 = null;
   x2 = null;
 }
-function handleTouchEnd(e) {
-    
-    sliderLine.style.transition = 'all ease 0.5s'
-  let xDiff = x2 - x1;
 
-  if (xDiff > 0 && Math.abs(xDiff) > width*0.15  && count > 0 && x2) {
-    count--;
-    rollSlider();
-    toggleActiveDot(count);
-  }
-  if (xDiff < 0 && Math.abs(xDiff) > width*0.15 && count != images.length - 1 && x2) {
-    count++;
-    rollSlider();
-    toggleActiveDot(count);
-  } else {
-    rollSlider();
-    toggleActiveDot(count);
-  }
-
-  x1 = null;
-  x2 = null;
-}
-function handleMouseStart(e) {
-    console.log('start',e)
-  x1 = e.screenX;
-  isSwipeMouse=true
-}
-function handleTouchStart(e) {
-  
-  const firstTouch = e.touches[0];
-  
-  x1 = firstTouch.screenX;
+function handleStart(e) {
+  x1 = e.type === mousedown ? e.screenX : e.touches[0].screenX;
+  isSwipeMouse = true;
 }
 
 function handleMouseMove(e) {
+  if (isSwipeMouse) {
+    handleMove(e);
+  }
+}
+function handleMove(e) {
   if (!x1) {
     return false;
   }
-if(isSwipeMouse){
-    sliderLine.style.transition = 'none'
-  x2 = e.screenX;
-
-  let xDiff = x2 - x1;
-
-  if (xDiff > 0 && count <= images.length) {
-    sliderLine.style.transform = `translateX(-${
-      width * count - Math.abs(xDiff)
-    }px`;
-  }
-  if (xDiff < 0 && count != images.length - 1) {
-    sliderLine.style.transform = `translateX(-${
-      width * count + Math.abs(xDiff)
-    }px)`;
-  }
-}
-
-}
-function handleTouchMove(e) {
-    console.log('move',e)
-  if (!x1) {
-    return false;
-  }
-  const firstTouch = e.touches[0];
-  
-
-  
-sliderLine.style.transition = 'none'
-  x2 = firstTouch.screenX;
+  sliderLine.style.transition = "none";
+  x2 = e.type === mousemove ? e.screenX : e.touches[0].screenX;
 
   let xDiff = x2 - x1;
 
